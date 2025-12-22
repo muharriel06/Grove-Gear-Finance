@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grove Gear Finance - Secure Cloud</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f0fdf4; color: #166534; }
+        .card-shadow { box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05); }
+        .emerald-gradient { background: linear-gradient(135deg, #10b981 0%, #059669 100%); }
+        #loginOverlay { backdrop-filter: blur(15px); background: rgba(255, 255, 255, 0.8); }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+<div id="loginOverlay" class="fixed inset-0 z-[100] flex items-center justify-center p-6">
+    <div class="bg-white p-8 rounded-[2.5rem] shadow-2xl max-w-sm w-full text-center border border-emerald-100">
+        <div class="w-20 h-20 bg-emerald-100 rounded-3xl mx-auto mb-6 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="text-emerald-600" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+        </div>
+        <h2 class="text-2xl font-bold text-emerald-900 mb-2">Akses Terkunci</h2>
+        <p class="text-emerald-600 text-sm mb-6">Masukkan PIN Grove Gear Finance</p>
+        <input type="password" id="pinInput" placeholder="PIN" class="w-full p-4 rounded-2xl bg-emerald-50 border border-emerald-100 text-center text-2xl tracking-widest outline-none focus:ring-2 focus:ring-emerald-500 mb-4">
+        <button onclick="checkLogin()" class="w-full emerald-gradient text-white py-4 rounded-2xl font-bold shadow-lg shadow-emerald-200">Buka Dashboard</button>
+    </div>
+</div>
+
+<div id="mainDashboard" class="max-w-6xl mx-auto hidden">
+    <header class="mb-10 flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-3xl card-shadow border border-emerald-50">
+        <div class="flex items-center gap-4">
+            <div class="w-16 h-16 bg-emerald-100 rounded-2xl flex items-center justify-center overflow-hidden border-2 border-emerald-500">
+                <img src="GROVE_GEAR_LOGO.png" alt="Logo" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/150/10b981/FFFFFF?text=GG'">
+            </div>
+            <div>
+                <h1 class="text-2xl font-extrabold text-emerald-900 tracking-tight">GROVE GEAR</h1>
+                <p class="text-emerald-600 text-[10px] font-bold tracking-[0.2em] uppercase">MANAGER FINANCE</p>
+            </div>
+        </div>
+        <div class="flex gap-3 mt-4 md:mt-0">
+            <button onclick="cetakLaporanWord()" class="bg-emerald-600 text-white px-6 py-3 rounded-xl text-sm font-bold hover:bg-emerald-700 transition shadow-lg flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                Cetak Word
+            </button>
+        </div>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="bg-white p-8 rounded-[2rem] card-shadow border-b-8 border-emerald-500">
+            <p class="text-emerald-500 text-xs font-bold uppercase tracking-widest">Pemasukan</p>
+            <h2 id="display-masuk" class="text-3xl font-bold text-emerald-700 mt-2">Rp 0</h2>
+        </div>
+        <div class="bg-white p-8 rounded-[2rem] card-shadow border-b-8 border-rose-500">
+            <p class="text-rose-500 text-xs font-bold uppercase tracking-widest">Pengeluaran</p>
+            <h2 id="display-keluar" class="text-3xl font-bold text-rose-700 mt-2">Rp 0</h2>
+        </div>
+        <div class="emerald-gradient p-8 rounded-[2rem] card-shadow text-white shadow-xl shadow-emerald-200">
+            <p class="text-emerald-100 text-xs font-bold uppercase tracking-widest">Saldo Akhir</p>
+            <h2 id="display-saldo" class="text-3xl font-bold mt-2 underline italic">Rp 0</h2>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10 mb-10">
+        <div class="lg:col-span-1">
+            <div class="bg-white p-8 rounded-[2.5rem] card-shadow border border-emerald-50">
+                <h3 class="text-lg font-bold mb-6 text-emerald-900 border-b pb-4">Input Baru</h3>
+                <form id="flowForm" class="space-y-4 text-sm">
+                    <input type="date" id="tgl" class="w-full p-4 bg-emerald-50 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" required>
+                    <input type="text" id="ket" placeholder="Keterangan" class="w-full p-4 bg-emerald-50 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" required>
+                    <input type="number" id="nominal" placeholder="Nominal Rp" class="w-full p-4 bg-emerald-50 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500" required>
+                    <select id="tipe" class="w-full p-4 bg-emerald-50 rounded-2xl outline-none focus:ring-2 focus:ring-emerald-500 font-bold">
+                        <option value="masuk">Pemasukan (+)</option>
+                        <option value="keluar">Pengeluaran (-)</option>
+                    </select>
+                    <button type="submit" class="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold hover:bg-emerald-700 transition transform active:scale-95 shadow-lg shadow-emerald-100">Simpan ke Cloud</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="lg:col-span-2 space-y-8">
+            <div class="bg-white p-8 rounded-[2.5rem] card-shadow border border-emerald-50">
+                <h3 class="text-lg font-bold mb-6 text-emerald-900">Grafik Trend</h3>
+                <canvas id="monthlyChart" height="100"></canvas>
+            </div>
+
+            <div class="bg-white rounded-[2.5rem] card-shadow overflow-hidden border border-emerald-50">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-emerald-50/50">
+                        <tr class="text-[10px] text-emerald-400 font-bold uppercase tracking-widest border-b border-emerald-100">
+                            <th class="p-6">Tanggal</th>
+                            <th class="p-6">Keterangan</th>
+                            <th class="p-6 text-right">Jumlah</th>
+                            <th class="p-6 text-center">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-emerald-50"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="flex justify-center mt-20 mb-10">
+        <button onclick="resetDataDatabase()" class="text-rose-400 hover:text-rose-600 text-xs font-bold uppercase tracking-widest flex items-center gap-2 transition opacity-50 hover:opacity-100">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Reset Semua Data Cloud
+        </button>
+    </div>
+</div>
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getDatabase, ref, push, onValue, remove, set } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDZmwR3HkZon33osEzcCeMlBgyeWnTQJcY",
+        authDomain: "grove-gear-finance.firebaseapp.com",
+        databaseURL: "https://grove-gear-finance-default-rtdb.asia-southeast1.firebasedatabase.app/",
+        projectId: "grove-gear-finance",
+        storageBucket: "grove-gear-finance.firebasestorage.app",
+        messagingSenderId: "543975396626",
+        appId: "1:543975396626:web:09c3e80db7b0a1ba878fcb"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const dbRef = ref(db, 'arusKas');
+    const PIN_BENAR = "1234"; 
+    let myChart, dataGlobal = [];
+
+    // Login
+    window.checkLogin = () => {
+        if(document.getElementById('pinInput').value === PIN_BENAR) {
+            document.getElementById('loginOverlay').classList.add('hidden');
+            document.getElementById('mainDashboard').classList.remove('hidden');
+        } else { alert("PIN Salah!"); }
+    };
+
+    // Form Submit
+    document.getElementById('flowForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const trx = {
+            tanggal: document.getElementById('tgl').value,
+            keterangan: document.getElementById('ket').value,
+            nominal: parseInt(document.getElementById('nominal').value),
+            tipe: document.getElementById('tipe').value
+        };
+        push(dbRef, trx).then(() => e.target.reset());
+    });
+
+    // Realtime Load
+    onValue(dbRef, (snapshot) => {
+        const data = snapshot.val();
+        dataGlobal = [];
+        if (data) Object.keys(data).forEach(k => dataGlobal.push({ id: k, ...data[k] }));
+        dataGlobal.sort((a,b) => new Date(b.tanggal) - new Date(a.tanggal));
+        updateUI();
+    });
+
+    function updateUI() {
+        let h = '', m = 0, k = 0;
+        dataGlobal.forEach(i => {
+            const isM = i.tipe === 'masuk';
+            isM ? m += i.nominal : k += i.nominal;
+            h += `
+                <tr class="hover:bg-emerald-50/50 transition">
+                    <td class="p-6 text-emerald-600 font-medium text-xs">${i.tanggal}</td>
+                    <td class="p-6 font-bold text-emerald-900">${i.keterangan}</td>
+                    <td class="p-6 text-right font-bold ${isM ? 'text-emerald-500' : 'text-rose-500'}">
+                        ${isM ? '+' : '-'} Rp ${i.nominal.toLocaleString('id-ID')}
+                    </td>
+                    <td class="p-6 text-center">
+                        <button onclick="hapusSatu('${i.id}')" class="text-emerald-200 hover:text-rose-500 transition font-bold text-lg">✕</button>
+                    </td>
+                </tr>`;
+        });
+        document.getElementById('tableBody').innerHTML = h || '<tr><td colspan="4" class="p-10 text-center text-emerald-200 italic">Database kosong</td></tr>';
+        document.getElementById('display-masuk').innerText = `Rp ${m.toLocaleString('id-ID')}`;
+        document.getElementById('display-keluar').innerText = `Rp ${k.toLocaleString('id-ID')}`;
+        document.getElementById('display-saldo').innerText = `Rp ${(m - k).toLocaleString('id-ID')}`;
+        renderChart();
+    }
+
+    function renderChart() {
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        const months = [...new Set(dataGlobal.map(x => x.tanggal.substring(0,7)))].sort();
+        if(myChart) myChart.destroy();
+        myChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: months,
+                datasets: [
+                    { label: 'Masuk', data: months.map(m => dataGlobal.filter(x => x.tanggal.startsWith(m) && x.tipe === 'masuk').reduce((a,b) => a+b.nominal,0)), borderColor: '#10b981', tension: 0.4, fill: true, backgroundColor: 'rgba(16, 185, 129, 0.05)' },
+                    { label: 'Keluar', data: months.map(m => dataGlobal.filter(x => x.tanggal.startsWith(m) && x.tipe === 'keluar').reduce((a,b) => a+b.nominal,0)), borderColor: '#f43f5e', tension: 0.4 }
+                ]
+            },
+            options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, border: {display: false} } } }
+        });
+    }
+
+    // RESET DATA SEMUA (DENGAN PIN KONFIRMASI)
+    window.resetDataDatabase = () => {
+        const pinVerify = prompt("PERINGATAN: Semua data akan dihapus selamanya!\nMasukkan PIN Anda untuk konfirmasi:");
+        if (pinVerify === PIN_BENAR) {
+            if (confirm("Apakah Anda YAKIN? Data tidak bisa dikembalikan.")) {
+                set(dbRef, null).then(() => alert("Database berhasil dikosongkan."));
+            }
+        } else if (pinVerify !== null) {
+            alert("PIN Salah! Reset dibatalkan.");
+        }
+    };
+
+    window.hapusSatu = (id) => { if(confirm('Hapus transaksi ini?')) remove(ref(db, `arusKas/${id}`)); };
+
+    window.cetakLaporanWord = () => {
+        const totalMasuk = dataGlobal.filter(x => x.tipe === 'masuk').reduce((a,b) => a+b.nominal, 0);
+        const totalKeluar = dataGlobal.filter(x => x.tipe === 'keluar').reduce((a,b) => a+b.nominal, 0);
+        let content = `<html><head><meta charset='utf-8'><style>body{font-family:'Courier New';width:80mm;margin:auto;}.c{text-align:center;}.line{border-bottom:1px dashed #000;margin:10px 0;}</style></head><body>
+            <div class="c"><h2>GROVE GEAR</h2><p>Laporan Cloud</p><p>${new Date().toLocaleString('id-ID')}</p></div>
+            <div class="line"></div>
+            <table width="100%">${dataGlobal.map(i => `<tr><td>${i.tanggal}<br>${i.keterangan}</td><td align="right">${i.tipe === 'masuk' ? '+' : '-'}${i.nominal}</td></tr>`).join('')}</table>
+            <div class="line"></div>
+            <p><b>SALDO: Rp ${(totalMasuk-totalKeluar).toLocaleString()}</b></p>
+            <div class="line"></div><p class="c">-- Selesai --</p></body></html>`;
+        const blob = new Blob(['\ufeff', content], { type: 'application/msword' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'Laporan_GroveGear.doc';
+        link.click();
+    };
+</script>
+</body>
+</html>
